@@ -1,0 +1,24 @@
+{
+  "name": "gamecontroller-service",
+  "version": "1.0.0",
+  "description": "A modular service that allows you to create virtual game controllers via a node web service and making use of pixi.js",
+  "main": "index.js",
+  "dependencies": {
+    "pixi": "^0.3.1",
+    "pixi-stick": "^0.1.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "run"
+  },
+  "keywords": [
+    "pixijs",
+    "controller",
+    "game",
+    "paddle",
+    "service",
+    "button"
+  ],
+  "author": "Brandon",
+  "license": "ISC"
+}
