@@ -59,11 +59,45 @@ var rightStick = new PixiStick.StickController(325, 225, {
     opacity: 0.3
 });
 
+//Define some buttons
+var aButton = new PIXI.Sprite.fromImage('img/nub.png');
+aButton.interactive = aButton.buttonMode = true;
+aButton.scale.x = aButton.scale.y = 0.1;
+aButton.click = aButton.tap = function (){console.log("OWWWN")};
+stage.addChild(aButton);
+
+// just gonna be lazy and copy paste here for now.
+var bButton = new PIXI.Sprite.fromImage('img/nub.png');
+bButton.interactive = bButton.buttonMode = true;
+bButton.scale.x = bButton.scale.y = 0.1;
+bButton.click = bButton.tap = function (){console.log("Oooph, my bones!")};
+bButton.x = 300;
+aButton.x = 200;
+bButton.y = 200;
+aButton.y = 200;
+stage.addChild(bButton);
+
+//alpha functions
+aButton.on('mousedown', test => {
+  this.tint = Math.random() * 0xFFFFFF;
+});
+
+bButton.on('mousedown',  test => {
+  this.tint = Math.random() * 0xFFFFFF;
+});
+
+
 // Add everything to the stage
 stage.addChild(leftSquare);
-stage.addChild(rightSquare);
+//stage.addChild(rightSquare);
 stage.addChild(leftStick);
-stage.addChild(rightStick);
+//stage.addChild(rightStick);
+
+var aButtonText = new PIXI.Text('A', { font: 'bold 350px Arial', fill: '#cc00ff', stroke: '#FFFFFF', strokeThickness: 6 });
+var bButtonText = new PIXI.Text('B', { font: 'bold 350px Arial', fill: '#cc00ff', stroke: '#FFFFFF', strokeThickness: 6 });
+aButtonText.x = bButtonText.x = 75;
+aButton.addChild(aButtonText);
+bButton.addChild(bButtonText);
 
 var playerSpeed = 10; // Define a maximum speed for the squares
 
