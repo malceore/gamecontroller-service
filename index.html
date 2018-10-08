@@ -1,3 +1,4 @@
+<html>
 <head>
     <!--<link rel="stylesheet" href="example.css" />-->
 </head>
@@ -5,11 +6,21 @@
 <body>
     <div id="gameDiv"></div>
 
-    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.0.0/pixi.min.js"></script>-->
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.0.0/pixi.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/3.0.11/pixi.min.js"></script>
-
+	-->
+    <script src="pixi.js"></script>
     <script src="pixi-stick.js"></script>
     <script src="index.js"></script>
-</body>
+    <script>
+  // if user is running mozilla then use it's built-in WebSocket
+  window.WebSocket = window.WebSocket || window.MozWebSocket;
 
+  var connection = new WebSocket('ws://127.0.0.1:1337');
+  connection.onopen = function () {
+    connection.send("Helloworld");
+  };
+
+    </script>
+</body>
 </html>

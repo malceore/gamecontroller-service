@@ -2,6 +2,15 @@
 /*** Custom Sprite StickController Example ***/
 /*********************************************/
 
+// My custom websocket stuff.
+// if user is running mozilla then use it's built-in WebSocket
+window.WebSocket = window.WebSocket || window.MozWebSocket;
+
+var connection = new WebSocket('ws://127.0.0.1:1337');
+
+
+
+
 // create a renderer instance.
 var renderer = PIXI.autoDetectRenderer(400, 300);
 renderer.backgroundColor = 0x8888ff;
@@ -62,12 +71,14 @@ var playerSpeed = 10; // Define a maximum speed for the squares
 leftStick.onAxisChange = function(axes) {
     leftSquare.xVel = axes.x * playerSpeed;
     leftSquare.yVel = axes.y * playerSpeed;
+    connection.send("axes y:" + axes.y + "axes x:" + axes.x);
 }
 
 // Handle rightStick input
 rightStick.onAxisChange = function(axes) {
     rightSquare.xVel = axes.x * playerSpeed;
     rightSquare.yVel = axes.y * playerSpeed;
+    connection.send("axes y:" + axes.y + "axes x:" + axes.x);
 }
 
 
