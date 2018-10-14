@@ -8,9 +8,6 @@ window.WebSocket = window.WebSocket || window.MozWebSocket;
 
 var connection = new WebSocket('ws://127.0.0.1:1337');
 
-
-
-
 // create a renderer instance.
 var renderer = PIXI.autoDetectRenderer(400, 300);
 renderer.backgroundColor = 0x8888ff;
