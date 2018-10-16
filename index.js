@@ -1,145 +1,67 @@
-/*********************************************/
-/*** Custom Sprite StickController Example ***/
-/*********************************************/
-
-// My custom websocket stuff.
-// if user is running mozilla then use it's built-in WebSocket
-window.WebSocket = window.WebSocket || window.MozWebSocket;
-
-var connection = new WebSocket('ws://127.0.0.1:1337');
-
-// create a renderer instance.
-var renderer = PIXI.autoDetectRenderer(400, 300);
-renderer.backgroundColor = 0x8888ff;
-
-// add the renderer view element to the DOM
-document.querySelector('#gameDiv').appendChild(renderer.view);
-
-// create a stage
-var stage = new PIXI.Container();
-
-// create a square to move around with the left stick
-var leftSquare = new PIXI.Graphics();
-leftSquare.x = 30;
-leftSquare.y = 30;
-leftSquare.xVel = 0;
-leftSquare.yVel = 0;
-
-leftSquare.beginFill(0x55ff55, 1);
-leftSquare.drawRect(0, 0, 20, 20);
-leftSquare.endFill();
-
-// create a square to move around with the right stick
-var rightSquare = new PIXI.Graphics();
-rightSquare.x = 30;
-rightSquare.y = 30;
-rightSquare.xVel = 0;
-rightSquare.yVel = 0;
-
-rightSquare.beginFill(0xff5555, 1);
-rightSquare.drawRect(0, 0, 20, 20);
-rightSquare.endFill();
+var http = require('http');
+var url = require('url');
+var fs = require('fs');
+let IDCount = 0;
 
 
-// Define a couple of sticks for the user to control;
-var leftStick = new PixiStick.StickController(75, 225, {
-    type: 'xy',
-    nub: new PIXI.Sprite.fromImage('img/nub.png'),
-    well: new PIXI.Sprite.fromImage('img/well.png'),
-    opacity: 0.3
+// Web File server configuraion.
+// -----------------------------------
+http.createServer(function (req, res) {
+  var q = url.parse(req.url, true);
+  var filename = "." + q.pathname;
+  fs.readFile(filename, function(err, data) {
+    if (err) {
+      res.writeHead(404, {'Content-Type': 'text/html'});
+      return res.end("404 Not Found");
+    }
+    res.writeHead(200, {'Content-Type': 'text/html'});
+    res.write(data);
+    return res.end();
+  });
+}).listen(8080);
+
+
+
+// Websocket server configuraion.
+// -----------------------------------
+var WebSocketServer = require('websocket').server;
+var server = http.createServer(function(request, response) {});
+
+server.listen(1337, function() { });
+
+// create the server
+wsServer = new WebSocketServer({
+  httpServer: server
 });
 
-var rightStick = new PixiStick.StickController(325, 225, {
-    type: 'xy',
-    nub: new PIXI.Sprite.fromImage('img/nub.png'),
-    well: new PIXI.Sprite.fromImage('img/well.png'),
-    opacity: 0.3
-});
+// WebSocket message received.
+wsServer.on('request', function(request) {
+  var connection = request.accept(null, request.origin);
 
-//Define some buttons
-var aButton = new PIXI.Sprite.fromImage('img/nub.png');
-aButton.interactive = aButton.buttonMode = true;
-aButton.scale.x = aButton.scale.y = 0.1;
-aButton.click = aButton.tap = function (){console.log("OWWWN")};
-stage.addChild(aButton);
+  connection.on('message', function(message) {
+    if (message.type === 'utf8') {
+      // process WebSocket message
+      let msg = message.utf8Data;
+      //console.log("Message received : " + message.utf8Data);
+      if(msg == "publisher"){
+        console.log("New Publisher!")
+        connection.send("id:" + IDCount);
+        IDCount++;
+      }else if(msg == "subscriber"){
+        console.log("New Subscriber!")
+        connection.send("id:" + IDCount);
+        connection.send("THE LIST");
+        IDCount++;
+      }else{
+        console.log("DEBUG :: " + msg);
+      }
+    }
+  });
 
-// just gonna be lazy and copy paste here for now.
-var bButton = new PIXI.Sprite.fromImage('img/nub.png');
-bButton.interactive = bButton.buttonMode = true;
-bButton.scale.x = bButton.scale.y = 0.1;
-bButton.click = bButton.tap = function (){console.log("Oooph, my bones!")};
-bButton.x = 300;
-aButton.x = 200;
-bButton.y = 200;
-aButton.y = 200;
-stage.addChild(bButton);
-
-//alpha functions
-aButton.on('mousedown', test => {
-  this.tint = Math.random() * 0xFFFFFF;
-});
-
-bButton.on('mousedown',  test => {
-  this.tint = Math.random() * 0xFFFFFF;
+  connection.on('close', function(connection) {
+    // close user connection
+    console.log("Disconnected!");
+  });
 });
 
 
-// Add everything to the stage
-stage.addChild(leftSquare);
-//stage.addChild(rightSquare);
-stage.addChild(leftStick);
-//stage.addChild(rightStick);
-
-var aButtonText = new PIXI.Text('A', { font: 'bold 350px Arial', fill: '#cc00ff', stroke: '#FFFFFF', strokeThickness: 6 });
-var bButtonText = new PIXI.Text('B', { font: 'bold 350px Arial', fill: '#cc00ff', stroke: '#FFFFFF', strokeThickness: 6 });
-aButtonText.x = bButtonText.x = 75;
-aButton.addChild(aButtonText);
-bButton.addChild(bButtonText);
-
-var playerSpeed = 10; // Define a maximum speed for the squares
-
-// Handle leftStick input
-leftStick.onAxisChange = function(axes) {
-    leftSquare.xVel = axes.x * playerSpeed;
-    leftSquare.yVel = axes.y * playerSpeed;
-    connection.send("axes y:" + axes.y + "axes x:" + axes.x);
-}
-
-// Handle rightStick input
-rightStick.onAxisChange = function(axes) {
-    rightSquare.xVel = axes.x * playerSpeed;
-    rightSquare.yVel = axes.y * playerSpeed;
-    connection.send("axes y:" + axes.y + "axes x:" + axes.x);
-}
-
-
-// Render the scene
-requestAnimationFrame(animate);
-
-function animate() {
-    requestAnimationFrame(animate);
-
-    // Compute new leftSquare position
-    leftSquare.x += leftSquare.xVel;
-    leftSquare.y += leftSquare.yVel;
-
-    // Lock the leftSquare into the viewable area
-    if (leftSquare.x > 380) leftSquare.x = 380;
-    if (leftSquare.x < 0) leftSquare.x = 0;
-    if (leftSquare.y > 280) leftSquare.y = 280;
-    if (leftSquare.y < 0) leftSquare.y = 0;
-
-    // Compute new rightSquare position
-    rightSquare.x += rightSquare.xVel;
-    rightSquare.y += rightSquare.yVel;
-
-    // Lock the rightSquare into the viewable area
-    if (rightSquare.x > 380) rightSquare.x = 380;
-    if (rightSquare.x < 0) rightSquare.x = 0;
-    if (rightSquare.y > 280) rightSquare.y = 280;
-    if (rightSquare.y < 0) rightSquare.y = 0;
-
-
-    // render the stage   
-    renderer.render(stage);
-}
