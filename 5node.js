@@ -39,6 +39,7 @@ wsServer = new WebSocketServer({
 // Accepting and parsing the requests..
 wsServer.on('request', function(request) {
   var index=0;
+  var type="";
   var connection = request.accept(null, request.origin);
 
   // Actions for when a message is received.
@@ -49,23 +50,37 @@ wsServer.on('request', function(request) {
       // If message is a publisher we need to store it in our server registry.
       if (message.utf8Data == "publisher") {
         console.log("Adding new publisher!");
+        type="publisher";
         index = publishers.push(connection)-1;
 
       // If the message is a subscriber we need to register them also in a list.
-      } else if(message.utf8dData == "subscriber") {
+      } else if(message.utf8Data == "subscriber") {
         console.log("Adding new subscriber!");
+        type="subscriber";
         index = subscribers.push(connection)-1;
 
-      // Otherwise just debug print out the value.
+      // Otherwise it's an event, print it out and send it toall the subscribers.
+      //	later will add it so you can subscribe to multiple things!
       } else {
         console.log("Message received : " + message.utf8Data);
+        //for each (sub in subscribers){
+        for(let i=0; i<subscribers.length; i++){
+          subscribers[i].send(message.utf8Data);
+        }
       }
     }
   });
 
   // Action for when someone closes the connection.
   connection.on('close', function(connection) {
-    console.log("Disconnected!");
+    if(type == "publisher") {
+      publishers.splice(index, 1);
+    } else if(type="subscriber"){
+      subscribers.splice(index, 1);
+    } else {
+      console.log("So long stranger..");
+    }
+    //console.log("Disconnected!");
   });
 });
 
