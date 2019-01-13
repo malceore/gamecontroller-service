@@ -52,12 +52,12 @@ var leftStick = new PixiStick.StickController(75, 225, {
 aButton = PixiButton("A", 200, 200);
 aButton.scale.x = aButton.scale.y = 0.1;
 aButton.click = aButton.tap = () => {
-    connection.send("ID:" + ID + ":Button Pressed:A");
+    connection.send(ID + ":A_Button");
 };
 var bButton = PixiButton("B", 300, 200);
 bButton.scale.x = bButton.scale.y = 0.1;
 bButton.click = bButton.tap = () => {
-    connection.send("ID:" + ID + ":Button Pressed:B");
+    connection.send(ID + ":B_BUtton");
 };
 
 // Add them to the canvas.
@@ -66,13 +66,19 @@ stage.addChild(aButton);
 stage.addChild(leftSquare);
 stage.addChild(leftStick);
 
-var playerSpeed = 10; // Define a maximum speed for the squares
+var playerSpeed = 5; // Define a maximum speed for the squares
+var flip = false;
 
 // Handle leftStick input
 leftStick.onAxisChange = function(axes) {
-    leftSquare.xVel = axes.x * playerSpeed;
-    leftSquare.yVel = axes.y * playerSpeed;
-    connection.send("ID:" + ID + " axes y:" + axes.y + " axes x:" + axes.x);
+    if (flip) {
+        //leftSquare.xVel = axes.x * playerSpeed;
+        //leftSquare.yVel = axes.y * playerSpeed;
+        connection.send(ID + ":" + Math.floor(100*axes.y) + ":" + Math.floor(100*axes.x));
+        flip = false;
+    } else {
+        flip = true;
+    }
 }
 
 // Render the scene
@@ -92,7 +98,7 @@ function animate() {
     if (leftSquare.y < 0) leftSquare.y = 0;
 
 
-    // render the stage   
+    // render the stage
     renderer.render(stage);
 }
     </script>

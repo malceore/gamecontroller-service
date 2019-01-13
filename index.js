@@ -53,6 +53,10 @@ wsServer.on('request', function(request) {
         type="publisher";
         index = publishers.push(connection)-1;
 
+	// Send them back their Unique ID.
+	index++;
+	connection.send("id:"+index);
+
       // If the message is a subscriber we need to register them also in a list.
       } else if(message.utf8Data == "subscriber") {
         console.log("Adding new subscriber!");
@@ -82,6 +86,7 @@ wsServer.on('request', function(request) {
     }
     //console.log("Disconnected!");
   });
+
 });
 
 
